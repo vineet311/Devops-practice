@@ -1,0 +1,118 @@
+Prerequisites:
+Hestia Control Panel installed on your server.
+A domain pointed to your server (optional, but recommended).
+A Linux server running Ubuntu or Debian (Hestia supports these).
+Step 1: Log into Hestia Control Panel
+Open your web browser and navigate to:
+arduino
+
+https://your-server-ip:8083
+Log in using your Hestia admin username and password.
+Step 2: Create a New User (Optional)
+You can manage everything as an admin user, but it's better to create a separate user for each website.
+
+Go to "Users" in the Hestia dashboard.
+Click on "Add User".
+Fill in the details such as username, email, and password.
+Assign an appropriate role (like “user”) and package (set resource limits).
+Click Save.
+Now, you can log in with this new user if you wish to manage WordPress under a different user account.
+
+Step 3: Add a New Domain
+Go to the "Web" section.
+Click "Add Web Domain".
+Enter the domain name you want to use for your WordPress site (e.g., example.com).
+If you are using the server's IP instead of a domain, use the server IP or a temporary domain name.
+Enable SSL and Let’s Encrypt if you want to use HTTPS (recommended).
+Click Save.
+Step 4: Create a Database for WordPress
+Go to the "Databases" section.
+Click "Add Database".
+Provide a database name, username, and password for your WordPress site.
+Set the type to MySQL (MariaDB).
+Click Save.
+Take note of the database credentials (name, username, and password), as you'll need them during the WordPress setup.
+
+Step 5: Install WordPress
+Method 1: One-Click Installer (If Hestia has WordPress Installer enabled)
+Go to the "Applications" section.
+Search for WordPress.
+Click on Install for the domain you want to install WordPress on.
+Fill in the necessary details (site name, admin email, username, and password).
+Complete the installation.
+Method 2: Manual Installation
+If the one-click installer is not available or you prefer to do it manually, follow these steps:
+
+Download WordPress:
+
+You can do this either from the terminal via SSH or from the Hestia file manager.
+SSH method:
+
+
+
+cd /home/yourusername/web/yourdomain.com/public_html
+wget https://wordpress.org/latest.tar.gz
+tar -xzvf latest.tar.gz
+mv wordpress/* ./
+rm -rf wordpress latest.tar.gz
+Or you can upload the WordPress zip file from your local machine using the File Manager in Hestia and extract it into the public_html directory.
+
+Set File Permissions: Make sure the web user has the proper ownership of the files:
+
+
+
+sudo chown -R yourusername:www-data /home/yourusername/web/yourdomain.com/public_html
+sudo chmod -R 755 /home/yourusername/web/yourdomain.com/public_html
+Step 6: Configure WordPress (wp-config.php)
+Create the wp-config.php file:
+
+Copy the sample file:
+
+
+cd /home/yourusername/web/yourdomain.com/public_html
+cp wp-config-sample.php wp-config.php
+Edit the wp-config.php file:
+
+Open the file for editing:
+
+
+
+nano wp-config.php
+Enter the database credentials you created in Step 4:
+
+php
+
+define('DB_NAME', 'your_db_name');
+define('DB_USER', 'your_db_username');
+define('DB_PASSWORD', 'your_db_password');
+define('DB_HOST', 'localhost');
+Save the file by pressing CTRL+X, then Y, and Enter.
+
+Step 7: Complete the WordPress Installation via Browser
+Open your browser and go to:
+arduino
+
+http://yourdomain.com
+You should see the WordPress installation screen.
+Choose your language and click Continue.
+Enter your site information:
+Site Title
+Admin Username
+Password
+Admin Email
+Click Install WordPress.
+Once installed, log in to the WordPress admin dashboard.
+Step 8: (Optional) Enable SSL with Let’s Encrypt
+If you didn't enable SSL during the domain setup, you can easily enable it now:
+
+Go to the "Web" section in Hestia.
+Find your domain and click "Edit".
+Scroll down to SSL Support and check the box.
+Enable Let’s Encrypt SSL by checking the box.
+Click Save.
+This will automatically generate and apply an SSL certificate for your domain.
+
+Step 9: Optimize and Secure Your WordPress Installation
+Install Security Plugins: Consider installing plugins like Wordfence or iThemes Security for better security.
+Backup Setup: Hestia provides automatic backups, but you can also install backup plugins like UpdraftPlus.
+Caching and Optimization: Install caching plugins like WP Super Cache or W3 Total Cache to improve performance.

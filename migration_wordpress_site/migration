@@ -1,0 +1,132 @@
+Step 1: Launch an EC2 Instance
+Login to AWS Console.
+Launch an EC2 Instance:
+Select the Amazon Machine Image (AMI) like Amazon Linux 2 or Ubuntu.
+Choose an instance type (e.g., t2.micro for small websites).
+Configure network settings (e.g., assign a public IP if needed, configure security groups).
+Make sure HTTP (port 80) and HTTPS (port 443) are allowed in your security group.
+Assign an Elastic IP (optional) if you want a static public IP.
+Connect to the EC2 instance using SSH.
+Step 2: Install LAMP Stack (Linux, Apache, MySQL, PHP)
+Update the instance:
+
+
+
+sudo yum update -y   # For Amazon Linux
+sudo apt update && sudo apt upgrade -y   # For Ubuntu
+Install Apache:
+
+
+
+sudo yum install httpd -y   # For Amazon Linux
+sudo apt install apache2 -y   # For Ubuntu
+Start and enable Apache to run on boot:
+
+
+
+sudo systemctl start httpd
+sudo systemctl enable httpd
+Install MySQL (or MariaDB):
+
+
+
+sudo yum install mariadb-server -y   # For Amazon Linux
+sudo apt install mysql-server -y   # For Ubuntu
+Start and enable MySQL:
+
+
+
+sudo systemctl start mariadb
+sudo systemctl enable mariadb
+Install PHP:
+
+
+
+sudo yum install php php-mysql -y   # Amazon Linux
+sudo apt install php libapache2-mod-php php-mysql -y   # Ubuntu
+Restart Apache to apply changes:
+
+
+
+sudo systemctl restart httpd
+Step 3: Transfer WordPress Files
+Zip the WordPress Files on VPS:
+
+
+
+zip -r wordpress-site.zip /path/to/wordpress
+Transfer the ZIP File to EC2:
+
+Use scp or rsync to transfer the file from your VPS to EC2.
+Example:
+
+
+
+scp -i /path/to/key.pem wordpress-site.zip ec2-user@your-ec2-ip:/var/www/html
+Unzip the WordPress Files on EC2:
+
+
+
+cd /var/www/html
+sudo unzip wordpress-site.zip
+sudo chown -R apache:apache /var/www/html/wordpress
+Step 4: Transfer WordPress Database
+Export the Database from VPS:
+
+
+
+mysqldump -u root -p database_name > wordpress_db.sql
+Transfer the Database Dump to EC2:
+
+
+
+scp -i /path/to/key.pem wordpress_db.sql ec2-user@your-ec2-ip:/home/ec2-user
+Import the Database to EC2 MySQL:
+
+Log in to MySQL on the EC2 instance:
+
+
+
+mysql -u root -p
+Create a new database and user:
+
+sql
+
+CREATE DATABASE wordpress_db;
+CREATE USER 'wpuser'@'localhost' IDENTIFIED BY 'your-password';
+GRANT ALL PRIVILEGES ON wordpress_db.* TO 'wpuser'@'localhost';
+FLUSH PRIVILEGES;
+Import the database:
+
+
+
+mysql -u root -p wordpress_db < /home/ec2-user/wordpress_db.sql
+Step 5: Update WordPress Configuration
+Edit wp-config.php on the EC2 instance:
+
+
+
+sudo nano /var/www/html/wordpress/wp-config.php
+Update the following lines to match the new database credentials:
+
+php
+
+define('DB_NAME', 'wordpress_db');
+define('DB_USER', 'wpuser');
+define('DB_PASSWORD', 'your-password');
+define('DB_HOST', 'localhost');
+Set File Permissions for security:
+
+
+
+sudo chown -R apache:apache /var/www/html/wordpress
+sudo find /var/www/html/wordpress/ -type d -exec chmod 755 {} \;
+sudo find /var/www/html/wordpress/ -type f -exec chmod 644 {} \;
+Step 6: Test and Go Live
+Restart Apache:
+
+
+
+sudo systemctl restart httpd
+Access your site using the EC2 public IP or Elastic IP.
+

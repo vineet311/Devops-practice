@@ -1,0 +1,101 @@
+o	Update your system:
+
+
+sudo dnf update -y
+o	Install Docker:
+
+
+sudo dnf install -y dnf-plugins-core
+sudo dnf config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+sudo dnf install docker-ce docker-ce-cli containerd.io -y
+ NOTE :  In case if you have any error from the podman packages try this 
+sudo yum install -y yum-utils
+sudo yum install  --allowerasing docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+o	Start and enable Docker:
+
+
+sudo systemctl start docker
+sudo systemctl enable docker
+o	Verify Docker installation:
+
+
+docker –version
+sudo chmod 666 /var/run/docker.sock
+sudo systemctl restart docker
+
+Step 1: Set Up Docker Compose (Optional but recommended)
+Docker Compose simplifies managing multi-container applications like Prometheus and Grafana.
+•	Install Docker Compose:
+
+
+sudo curl -L "https://github.com/docker/compose/releases/download/v2.6.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+sudo chmod +x /usr/local/bin/docker-compose
+•	Verify installation:
+
+
+docker-compose --version
+Step 2: Create Docker Compose File for Prometheus and Grafana
+Create a directory for your setup:
+
+
+mkdir monitoring
+cd monitoring
+Create a docker-compose.yml file:
+
+
+vim docker-compose.yml
+Add the following content:
+yaml
+
+version: '3'
+
+services:
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin  # You can change this password
+    ports:
+      - "3000:3000"
+Step 3: Create Prometheus Configuration
+Prometheus requires a configuration file. Create a file prometheus.yml in the same directory:
+
+
+vim prometheus.yml
+Add the following configuration:
+yaml
+
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+Step 4: Start Prometheus and Grafana
+Run Docker Compose to start both Prometheus and Grafana:
+
+
+docker-compose up -d
+This will pull the necessary images, create the containers, and start them in the background.
+Step 5: Access Prometheus and Grafana
+•	Prometheus will be available at http://<your-almalinux-ip>:9090
+•	Grafana will be available at http://<your-almalinux-ip>:3000
+You can log into Grafana using the default credentials:
+•	Username: admin
+•	Password: admin (or the password you set in docker-compose.yml)
+Step 6: Add Prometheus as a Data Source in Grafana
+1.	Log into Grafana.
+2.	Go to Configuration -> Data Sources.
+3.	Click Add data source and select Prometheus.
+4.	Set the URL to http://prometheus:9090 (since both are on the same network created by Docker Compose).
+5.	Click Save & Test.
+
